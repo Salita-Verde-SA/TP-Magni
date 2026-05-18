@@ -1,45 +1,36 @@
-version: '3.8'
-
 services:
-  db:
-    image: mongo:latest
-    container_name: tp6-db
-    ports:
-      - "27017:27017"
+  mongo:
+    image: mongo:7.0
+    container_name: tp7-mongo
+    restart: unless-stopped
     volumes:
       - mongo-data:/data/db
-    networks:
-      - tp6-network
 
-  server:
-    build: ./server
-    container_name: tp6-server
-    ports:
-      - "3000:3000"
+  api:
+    build:
+      context: ./server
+    container_name: tp7-api
+    restart: unless-stopped
     environment:
-      - MONGO_URL=mongodb://db:27017/registro-evento
-      - PORT=3000
+      PORT: 3000
+      MONGO_URL: mongodb://mongo:27017/registro-evento
+      JWT_SECRET: ${JWT_SECRET:-jwt_secreto_tp7_desarrollo}
+    ports:
+      - "${API_PORT:-3000}:3000"
     depends_on:
-      - db
-    networks:
-      - tp6-network
+      - mongo
 
   frontend:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://localhost:3000
-    container_name: tp6-frontend
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    container_name: tp7-frontend
+    restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${FRONTEND_PORT:-8080}:80"
     depends_on:
-      - server
-    networks:
-      - tp6-network
-
-networks:
-  tp6-network:
-    driver: bridge
+      - api
 
 volumes:
   mongo-data:

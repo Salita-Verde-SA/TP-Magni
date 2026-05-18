@@ -20,9 +20,7 @@ interface FiltrosProps {
   setFiltros: (filtros: FiltrosState) => void
 }
 
-// UI de filtros; no guarda estado, solo notifica cambios.
 export function Filtros({ filtros, setFiltros }: FiltrosProps) {
-  // Restaura los filtros al estado inicial.
   const limpiarFiltros = () => setFiltros(FILTROS_INICIALES)
 
   return (

@@ -118,7 +118,7 @@ export function Formulario({ onSuccess }: FormularioProps = {}) {
 
   return (
     <section className="bg-white border border-slate-200 rounded-sm p-6 mb-8">
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={(e) => void handleSubmit(e)}>
         <label className="flex flex-col gap-1">
           <input
             required
@@ -223,9 +223,7 @@ export function Formulario({ onSuccess }: FormularioProps = {}) {
           Acepto terminos
         </label>
 
-        {error && (
-          <p className="md:col-span-2 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="md:col-span-2 text-sm text-red-600">{error}</p>}
 
         <div className="md:col-span-2 flex gap-4">
           <button
@@ -239,7 +237,7 @@ export function Formulario({ onSuccess }: FormularioProps = {}) {
               type="button"
               onClick={() => {
                 cancelarEdicion()
-                navigate('/')
+                navigate('/lista')
               }}
               className="bg-slate-500 text-white px-5 py-2 rounded-sm hover:bg-slate-600 transition"
             >

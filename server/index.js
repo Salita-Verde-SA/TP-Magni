@@ -1,16 +1,26 @@
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
-
+import jwt from 'jsonwebtoken'
 
 const app = express()
 const PORT = Number(process.env.PORT ?? 3000)
-const MONGO_URL =
-  process.env.MONGO_URL ?? 'mongodb://localhost:27017/registro-evento'
+const MONGO_URL = process.env.MONGO_URL ?? 'mongodb://localhost:27017/registro-evento'
+const JWT_SECRET = process.env.JWT_SECRET ?? 'jwt_secreto_tp7_desarrollo'
 
 app.use(cors())
 app.use(express.json())
 
+// ─── Schemas ───────────────────────────────────────────────────────────────────
+
+const usuarioSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true, trim: true },
+    password: { type: String, required: true },
+    rol: { type: String, enum: ['ADMIN', 'CONSULTA'], required: true },
+  },
+  { versionKey: false },
+)
 
 const participanteSchema = new mongoose.Schema(
   {
@@ -24,32 +34,76 @@ const participanteSchema = new mongoose.Schema(
     nivel: { type: String, required: true },
     aceptaTerminos: { type: Boolean, required: true },
   },
-  {
-    versionKey: false,
-  },
+  { versionKey: false },
 )
 
-
+const Usuario = mongoose.model('Usuario', usuarioSchema, 'usuarios_db')
 const Participante = mongoose.model('Participante', participanteSchema)
 
+// ─── Seed usuarios ──────────────────────────────────────────────────────────────
+
+const seedUsuarios = async () => {
+  const count = await Usuario.countDocuments()
+  if (count === 0) {
+    await Usuario.insertMany([
+      { username: 'admin', password: 'admin123', rol: 'ADMIN' },
+      { username: 'consulta', password: 'consulta123', rol: 'CONSULTA' },
+    ])
+    console.log('Usuarios creados: admin/admin123 (ADMIN) | consulta/consulta123 (CONSULTA)')
+  }
+}
+
+// ─── JWT Middleware ─────────────────────────────────────────────────────────────
+
+const verificarToken = (req, res, next) => {
+  const authHeader = req.headers.authorization
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'No autorizado' })
+    return
+  }
+  const token = authHeader.split(' ')[1]
+  try {
+    req.usuario = jwt.verify(token, JWT_SECRET)
+    next()
+  } catch {
+    res.status(401).json({ error: 'Token inválido o expirado' })
+  }
+}
+
+// ─── Rutas públicas ─────────────────────────────────────────────────────────────
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body
+  const usuario = await Usuario.findOne({ username, password })
+  if (!usuario) {
+    res.status(401).json({ error: 'Credenciales inválidas' })
+    return
+  }
+  const token = jwt.sign(
+    { username: usuario.username, rol: usuario.rol },
+    JWT_SECRET,
+    { expiresIn: '8h' },
+  )
+  res.json({ token, usuario: { username: usuario.username, rol: usuario.rol } })
+})
+
+// ─── Rutas protegidas ───────────────────────────────────────────────────────────
+
+app.use('/participantes', verificarToken)
 
 app.get('/participantes', async (_req, res) => {
   const participantes = await Participante.find().sort({ id: -1 })
   res.json(participantes)
 })
 
-
 app.post('/participantes', async (req, res) => {
   const payload = req.body
-
   if (!payload.id) {
     payload.id = Date.now()
   }
-
   const participante = await Participante.create(payload)
   res.status(201).json(participante)
 })
-
 
 app.put('/participantes/:id', async (req, res) => {
   const id = Number(req.params.id)
@@ -57,51 +111,45 @@ app.put('/participantes/:id', async (req, res) => {
     res.status(400).json({ error: 'ID invalido' })
     return
   }
-
-  const payload = req.body
-  const result = await Participante.findOneAndUpdate({ id }, payload, { new: true })
-
+  const result = await Participante.findOneAndUpdate({ id }, req.body, { new: true })
   if (!result) {
     res.status(404).json({ error: 'Participante no encontrado' })
     return
   }
-
   res.json(result)
 })
 
-
 app.delete('/participantes/:id', async (req, res) => {
   const id = Number(req.params.id)
-
   if (Number.isNaN(id)) {
     res.status(400).json({ error: 'ID invalido' })
     return
   }
-
   const result = await Participante.deleteOne({ id })
-
   if (!result.deletedCount) {
     res.status(404).json({ error: 'Participante no encontrado' })
     return
   }
-
   res.status(204).send()
 })
-
 
 app.delete('/participantes', async (_req, res) => {
   await Participante.deleteMany({})
   res.status(204).send()
 })
 
+// ─── Error handler ──────────────────────────────────────────────────────────────
 
 app.use((err, _req, res, _next) => {
   res.status(500).json({ error: err?.message ?? 'Error inesperado' })
 })
 
+// ─── Start ──────────────────────────────────────────────────────────────────────
+
 mongoose
   .connect(MONGO_URL)
-  .then(() => {
+  .then(async () => {
+    await seedUsuarios()
     app.listen(PORT, () => {
       console.log(`API escuchando en http://localhost:${PORT}`)
     })

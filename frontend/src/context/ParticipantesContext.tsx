@@ -3,6 +3,11 @@ import type { Participante } from '../models/Participante'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
+const getAuthHeaders = () => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+})
+
 export type Action =
   | { type: 'GET_PARTICIPANTES'; payload: Participante[] }
   | { type: 'AGREGAR'; payload: Participante }
@@ -42,10 +47,6 @@ interface ContextType {
 
 const ParticipantesContext = createContext<ContextType | undefined>(undefined)
 
-const jsonHeaders = {
-  'Content-Type': 'application/json',
-}
-
 const handleJsonResponse = async <T,>(response: Response): Promise<T> => {
   if (!response.ok) {
     const message = await response.text()
@@ -61,7 +62,9 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     const cargar = async () => {
       try {
-        const response = await fetch(`${API_BASE}/participantes`)
+        const response = await fetch(`${API_BASE}/participantes`, {
+          headers: getAuthHeaders(),
+        })
         const data = await handleJsonResponse<Participante[]>(response)
         dispatch({ type: 'GET_PARTICIPANTES', payload: data })
       } catch {
@@ -75,7 +78,7 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
   const agregar = useCallback(async (nuevo: Participante) => {
     const response = await fetch(`${API_BASE}/participantes`, {
       method: 'POST',
-      headers: jsonHeaders,
+      headers: getAuthHeaders(),
       body: JSON.stringify(nuevo),
     })
     const creado = await handleJsonResponse<Participante>(response)
@@ -85,7 +88,7 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
   const editar = useCallback(async (modificado: Participante) => {
     const response = await fetch(`${API_BASE}/participantes/${modificado.id}`, {
       method: 'PUT',
-      headers: jsonHeaders,
+      headers: getAuthHeaders(),
       body: JSON.stringify(modificado),
     })
     const actualizado = await handleJsonResponse<Participante>(response)
@@ -96,6 +99,7 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
   const eliminar = useCallback(async (id: number) => {
     const response = await fetch(`${API_BASE}/participantes/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     })
 
     if (!response.ok && response.status !== 204) {
@@ -109,6 +113,7 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
   const resetear = useCallback(async () => {
     const response = await fetch(`${API_BASE}/participantes`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     })
 
     if (!response.ok && response.status !== 204) {
@@ -145,11 +150,7 @@ export function ParticipantesProvider({ children }: { children: React.ReactNode 
     ],
   )
 
-  return (
-    <ParticipantesContext.Provider value={value}>
-      {children}
-    </ParticipantesContext.Provider>
-  )
+  return <ParticipantesContext.Provider value={value}>{children}</ParticipantesContext.Provider>
 }
 
 export function useParticipantes() {

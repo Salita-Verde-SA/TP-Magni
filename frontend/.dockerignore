@@ -3,4 +3,6 @@ dist
 .env
 .git
 .gitignore
-.vscode
+Dockerfile
+.dockerignore
+npm-debug.log

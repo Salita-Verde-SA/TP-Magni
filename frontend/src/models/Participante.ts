@@ -13,7 +13,6 @@ export class Participante {
   nivel: Nivel
   aceptaTerminos: boolean
 
-  // Construye un participante y asigna un id basado en timestamp.
   constructor(
     nombre: string,
     email: string,
