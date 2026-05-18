@@ -1,51 +1,55 @@
-import {MODALIDADES, NIVELES, type Modalidad, type Nivel } from '../models/Participante'
+import type { Modalidad, Nivel } from '../models/Participante'
 
-interface FiltrosProps {
-  buscarNombre: string
-  setBuscarNombre: (value: string) => void
-  filtroModalidad: 'Todas' | Modalidad
-  setFiltroModalidad: (value: 'Todas' | Modalidad) => void
-  filtroNivel: 'Todos' | Nivel
-  setFiltroNivel: (value: 'Todos' | Nivel) => void
-  onLimpiarFiltros: () => void
-  onResetearDatos: () => void
+const MODALIDADES: Modalidad[] = ['Presencial', 'Virtual', 'Hibrido']
+const NIVELES: Nivel[] = ['Principiante', 'Intermedio', 'Avanzado']
+
+export interface FiltrosState {
+  nombre: string
+  modalidad: 'Todas' | Modalidad
+  nivel: 'Todos' | Nivel
 }
 
-export default function Filtros({
-  buscarNombre,
-  setBuscarNombre,
-  filtroModalidad,
-  setFiltroModalidad,
-  filtroNivel,
-  setFiltroNivel,
-  onLimpiarFiltros,
-  onResetearDatos,
-}: FiltrosProps) {
+export const FILTROS_INICIALES: FiltrosState = {
+  nombre: '',
+  modalidad: 'Todas',
+  nivel: 'Todos',
+}
+
+interface FiltrosProps {
+  filtros: FiltrosState
+  setFiltros: (filtros: FiltrosState) => void
+}
+
+// UI de filtros; no guarda estado, solo notifica cambios.
+export function Filtros({ filtros, setFiltros }: FiltrosProps) {
+  // Restaura los filtros al estado inicial.
+  const limpiarFiltros = () => setFiltros(FILTROS_INICIALES)
+
   return (
     <section className="bg-white border border-slate-200 rounded-sm p-4 mb-5">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
         <label className="flex flex-col gap-1">
           <input
             type="text"
-            value={buscarNombre}
-            onChange={(e) => setBuscarNombre(e.target.value)}
-            placeholder="Buscar"
+            value={filtros.nombre}
+            onChange={(e) => setFiltros({ ...filtros, nombre: e.target.value })}
+            placeholder="Buscar por nombre"
             className="rounded-sm border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
         <label className="flex flex-col gap-1">
           <select
-            value={filtroModalidad}
+            value={filtros.modalidad}
             onChange={(e) =>
-              setFiltroModalidad(e.target.value as 'Todas' | Modalidad)
+              setFiltros({ ...filtros, modalidad: e.target.value as 'Todas' | Modalidad })
             }
             className="rounded-sm border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="Todas">Todas</option>
-            {MODALIDADES.map((modalidad) => (
-              <option key={modalidad} value={modalidad}>
-                {modalidad}
+            <option value="Todas">Todas las modalidades</option>
+            {MODALIDADES.map((m) => (
+              <option key={m} value={m}>
+                {m}
               </option>
             ))}
           </select>
@@ -53,33 +57,28 @@ export default function Filtros({
 
         <label className="flex flex-col gap-1">
           <select
-            value={filtroNivel}
-            onChange={(e) => setFiltroNivel(e.target.value as 'Todos' | Nivel)}
+            value={filtros.nivel}
+            onChange={(e) =>
+              setFiltros({ ...filtros, nivel: e.target.value as 'Todos' | Nivel })
+            }
             className="rounded-sm border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="Todos">Todos</option>
-            {NIVELES.map((nivel) => (
-              <option key={nivel} value={nivel}>
-                {nivel}
+            <option value="Todos">Todos los niveles</option>
+            {NIVELES.map((n) => (
+              <option key={n} value={n}>
+                {n}
               </option>
             ))}
           </select>
         </label>
-            
-            <button
-              onClick={onLimpiarFiltros}
-              className="text-sm px-3 py-1 rounded-sm bg-gray-500 text-white hover:bg-gray-600 transition"
-            >
-              Limpiar filtros
-            </button>
-            <button
-              onClick={onResetearDatos}
-              className="text-sm px-3 py-1 rounded-sm bg-red-500 text-white hover:bg-red-600 transition"
-            >
-              Resetear datos
-            </button>
-
       </div>
+
+      <button
+        onClick={limpiarFiltros}
+        className="text-sm px-3 py-1.5 rounded-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition"
+      >
+        Limpiar filtros
+      </button>
     </section>
   )
 }

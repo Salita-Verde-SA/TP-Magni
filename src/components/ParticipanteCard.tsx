@@ -1,22 +1,37 @@
-import { colorFondoTarjeta, colorTextoNivel ,type Participante } from '../models/Participante'
+import type { Participante, Nivel } from '../models/Participante'
+import { useParticipantes } from '../context/ParticipantesContext'
+
+// Mapea nivel a color de fondo.
+const colorFondoTarjeta = (nivel: Nivel): string => {
+  if (nivel === 'Principiante') return 'bg-emerald-100'
+  if (nivel === 'Intermedio') return 'bg-yellow-100'
+  return 'bg-rose-100'
+}
+
+// Mapea nivel a color de texto.
+const colorTextoNivel = (nivel: Nivel): string => {
+  if (nivel === 'Principiante') return 'text-emerald-700'
+  if (nivel === 'Intermedio') return 'text-amber-700'
+  return 'text-rose-600'
+}
 
 interface ParticipanteCardProps {
   participante: Participante
-  onEliminar: (id: number) => void
 }
 
-export default function ParticipanteCard({ participante, onEliminar }: ParticipanteCardProps) {
+// Tarjeta de participante con boton eliminar.
+export function ParticipanteCard({ participante }: ParticipanteCardProps) {
+  const { eliminar } = useParticipantes()
+
   return (
     <article
       className={`rounded-sm p-4 border border-slate-200 ${colorFondoTarjeta(participante.nivel)}`}
     >
-      <h3 className="text-lg font-semibold mb-1">
-        {participante.nombre}
-      </h3>
+      <h3 className="text-lg font-semibold mb-1">{participante.nombre}</h3>
+      <p className="text-sm text-slate-500 mb-1">{participante.email}</p>
       <p className="mb-2">{participante.pais}</p>
       <p className="text-sm mb-1">
-        <span className="font-medium">Modalidad:</span>{' '}
-        {participante.modalidad}
+        <span className="font-medium">Modalidad:</span> {participante.modalidad}
       </p>
       <p className="text-sm mb-3">
         <span className={`font-semibold ${colorTextoNivel(participante.nivel)}`}>
@@ -30,7 +45,7 @@ export default function ParticipanteCard({ participante, onEliminar }: Participa
       </p>
       <div className="flex items-center justify-start">
         <button
-          onClick={() => onEliminar(participante.id)}
+          onClick={() => void eliminar(participante.id)}
           className="text-sm px-3 py-1 rounded-sm bg-red-500 text-white hover:bg-red-600 transition"
         >
           Eliminar
