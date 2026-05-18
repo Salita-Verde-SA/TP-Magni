@@ -1,2 +1,2 @@
 # TP-Magni
-Food Store
+Administrador de participantes
