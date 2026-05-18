@@ -119,3 +119,4 @@ Colecciones usadas:
 
 - En Docker, la API usa `MONGO_URL` del `.env` raíz (por defecto `mongodb://mongo:27017/registro-evento`).
 - Si se ejecuta el backend en local, no usar `localhost` desde dentro de contenedores.
+
