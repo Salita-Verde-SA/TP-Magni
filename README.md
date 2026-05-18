@@ -23,6 +23,8 @@ Aplicacion full stack para gestionar participantes de un evento. Tiene:
 
 Desde la raiz del proyecto:
 
+Crear `.env` en la raíz basado en `.env.example`, luego:
+
 ```bash
 docker compose up --build
 ```
@@ -48,7 +50,7 @@ npm install
 npm run dev
 ```
 
-Variables usadas por la API:
+Variables usadas por la API (server/.env):
 
 - `PORT` - puerto de la API, por defecto `3000`
 - `MONGO_URL` - conexion a MongoDB, por defecto `mongodb://localhost:27017/registro-evento`
@@ -62,7 +64,7 @@ npm install
 npm run dev
 ```
 
-Si la API no corre en `http://localhost:3000`, se debe definir `VITE_API_URL` antes de arrancar Vite.
+Si la API no corre en `http://localhost:3000`, se debe definir `VITE_API_URL` en `frontend/.env` antes de arrancar Vite.
 
 ## Uso de la aplicacion
 
@@ -115,5 +117,6 @@ Colecciones usadas:
 
 ## Notas
 
-- En Docker, la API debe usar `mongodb://mongo:27017/registro-evento`.
+- En Docker, la API usa `MONGO_URL` del `.env` raíz (por defecto `mongodb://mongo:27017/registro-evento`).
 - Si se ejecuta el backend en local, no usar `localhost` desde dentro de contenedores.
+
