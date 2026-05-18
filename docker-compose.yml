@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: tp6-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - tp6-network
+
+  server:
+    build: ./server
+    container_name: tp6-server
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=mongodb://db:27017/registro-evento
+      - PORT=3000
+    depends_on:
+      - db
+    networks:
+      - tp6-network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=http://localhost:3000
+    container_name: tp6-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - tp6-network
+
+networks:
+  tp6-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
