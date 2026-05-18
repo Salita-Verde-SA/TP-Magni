@@ -12,8 +12,8 @@ services:
     container_name: tp7-api
     restart: unless-stopped
     environment:
-      PORT: 3000
-      MONGO_URL: mongodb://mongo:27017/registro-evento
+      PORT: ${PORT:-3000}
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017/registro-evento}
       JWT_SECRET: ${JWT_SECRET:-jwt_secreto_tp7_desarrollo}
     ports:
       - "${API_PORT:-3000}:3000"
