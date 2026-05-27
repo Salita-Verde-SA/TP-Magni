@@ -15,6 +15,13 @@ function App() {
         Lista de Participantes
       </Link>
 
+      <Link
+        to="/cursos"
+        className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold px-12 py-4 rounded-sm hover:from-emerald-600 hover:to-teal-750 transition text-lg w-72 text-center shadow-md hover:shadow-lg"
+      >
+        Ver Cursos (Pago)
+      </Link>
+
       {user?.rol === 'ADMIN' && (
         <Link
           to="/nuevo"

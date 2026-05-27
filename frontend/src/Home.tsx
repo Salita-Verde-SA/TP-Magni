@@ -5,6 +5,10 @@ import { PublicaPage } from './pages/PublicaPage'
 import { ListaPage } from './pages/ListaPage'
 import { FormularioPage } from './pages/FormularioPage'
 import { EditarPage } from './pages/EditarPage'
+import { CursosPage } from './pages/CursosPage'
+import { PagoExitosoPage } from './pages/PagoExitosoPage'
+import { PagoFallidoPage } from './pages/PagoFallidoPage'
+import { PagoPendientePage } from './pages/PagoPendientePage'
 import PrivateRoute from './routes/PrivateRoute'
 
 export default function Home() {
@@ -45,6 +49,10 @@ export default function Home() {
           </PrivateRoute>
         }
       />
+      <Route path="/cursos" element={<CursosPage />} />
+      <Route path="/pago-exitoso" element={<PagoExitosoPage />} />
+      <Route path="/pago-fallido" element={<PagoFallidoPage />} />
+      <Route path="/pago-pendiente" element={<PagoPendientePage />} />
     </Routes>
   )
 }

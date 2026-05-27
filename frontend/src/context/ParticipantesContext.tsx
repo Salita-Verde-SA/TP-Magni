@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { Participante } from '../models/Participante'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 const getAuthHeaders = () => ({
   'Content-Type': 'application/json',

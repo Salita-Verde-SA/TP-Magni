@@ -1,12 +1,20 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
+import { MercadoPagoConfig, Preference } from 'mercadopago'
 
 const app = express()
 const PORT = Number(process.env.PORT ?? 3000)
 const MONGO_URL = process.env.MONGO_URL ?? 'mongodb://localhost:27017/registro-evento'
 const JWT_SECRET = process.env.JWT_SECRET ?? 'jwt_secreto_tp7_desarrollo'
+
+const MERCADO_PAGO_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR-6103220580466174-052718-379ef26066b9b826c50568465dd5a166-2935426206'
+
+const mpClient = new MercadoPagoConfig({
+  accessToken: MERCADO_PAGO_ACCESS_TOKEN
+})
 
 app.use(cors())
 app.use(express.json())
@@ -85,6 +93,49 @@ app.post('/login', async (req, res) => {
     { expiresIn: '8h' },
   )
   res.json({ token, usuario: { username: usuario.username, rol: usuario.rol } })
+})
+
+app.post('/pago/preferencia', async (req, res) => {
+  const { id, nombre, precio, back_urls } = req.body
+
+  if (!MERCADO_PAGO_ACCESS_TOKEN) {
+    res.status(500).json({ error: 'Falta configurar la variable MERCADO_PAGO_ACCESS_TOKEN en el servidor' })
+    return
+  }
+
+  try {
+    const preference = new Preference(mpClient)
+    const successUrl = back_urls?.success || 'http://localhost:5173/pago-exitoso'
+    const failureUrl = back_urls?.failure || 'http://localhost:5173/pago-fallido'
+    const pendingUrl = back_urls?.pending || 'http://localhost:5173/pago-pendiente'
+
+    const body = {
+      items: [
+        {
+          id: id,
+          title: nombre,
+          quantity: 1,
+          unit_price: Number(precio),
+          currency_id: 'ARS',
+        },
+      ],
+      back_urls: {
+        success: successUrl,
+        failure: failureUrl,
+        pending: pendingUrl,
+      }
+    }
+
+    if (successUrl.startsWith('https') || successUrl.includes('localhost')) {
+      body.auto_return = 'approved'
+    }
+
+    const response = await preference.create({ body })
+    res.json({ id: response.id, init_point: response.init_point })
+  } catch (error) {
+    console.error('Error al crear preferencia de Mercado Pago:', error)
+    res.status(500).json({ error: error.message || 'Error al crear la preferencia de pago' })
+  }
 })
 
 // ─── Rutas protegidas ───────────────────────────────────────────────────────────
