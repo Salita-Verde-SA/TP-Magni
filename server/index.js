@@ -10,7 +10,7 @@ const PORT = Number(process.env.PORT ?? 3000)
 const MONGO_URL = process.env.MONGO_URL ?? 'mongodb://localhost:27017/registro-evento'
 const JWT_SECRET = process.env.JWT_SECRET ?? 'jwt_secreto_tp7_desarrollo'
 
-const MERCADO_PAGO_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR-6103220580466174-052718-379ef26066b9b826c50568465dd5a166-2935426206'
+const MERCADO_PAGO_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN
 
 const mpClient = new MercadoPagoConfig({
   accessToken: MERCADO_PAGO_ACCESS_TOKEN
