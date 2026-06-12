@@ -1,10 +1,36 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 export function PagoExitosoPage() {
   const [searchParams] = useSearchParams()
   const paymentId = searchParams.get('payment_id') ?? 'N/A'
   const status = searchParams.get('status') ?? 'approved'
   const merchantOrderId = searchParams.get('merchant_order_id') ?? 'N/A'
+  const cursoId = searchParams.get('external_reference')
+
+  useEffect(() => {
+    if (cursoId && cursoId !== 'null' && status === 'approved') {
+      const registrarCurso = async () => {
+        try {
+          const token = localStorage.getItem('token')
+          if (!token) return
+          await fetch(`${API_BASE}/mis-cursos`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ cursoId })
+          })
+        } catch (error) {
+          console.error('Error registrando el curso comprado', error)
+        }
+      }
+      void registrarCurso()
+    }
+  }, [cursoId, status])
 
   return (
     <main className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">

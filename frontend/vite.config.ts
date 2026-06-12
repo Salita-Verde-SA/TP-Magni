@@ -8,7 +8,8 @@ export default defineConfig({
     proxy: {
       '/pago/preferencia': 'http://localhost:3000',
       '/login': 'http://localhost:3000',
-      '/participantes': 'http://localhost:3000'
+      '/participantes': 'http://localhost:3000',
+      '/mis-cursos': 'http://localhost:3000'
     }
   },
 })

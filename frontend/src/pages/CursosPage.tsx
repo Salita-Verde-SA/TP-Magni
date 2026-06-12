@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Layout } from '../components/Layout'
 
@@ -81,6 +81,26 @@ const CURSOS: Curso[] = [
 export function CursosPage() {
   const [loadingCursoId, setLoadingCursoId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [misCursos, setMisCursos] = useState<string[]>([])
+
+  useEffect(() => {
+    const fetchMisCursos = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+        const response = await fetch(`${API_BASE}/mis-cursos`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setMisCursos(data)
+        }
+      } catch (err) {
+        console.error('Error fetching mis cursos', err)
+      }
+    }
+    void fetchMisCursos()
+  }, [])
 
   const handleComprar = async (curso: Curso) => {
     setLoadingCursoId(curso.id)
@@ -158,6 +178,7 @@ export function CursosPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {CURSOS.map((curso) => {
             const isLoading = loadingCursoId === curso.id
+            const isComprado = misCursos.includes(curso.id)
             return (
               <article
                 key={curso.id}
@@ -204,8 +225,12 @@ export function CursosPage() {
 
                   <button
                     onClick={() => void handleComprar(curso)}
-                    disabled={isLoading || loadingCursoId !== null}
-                    className="w-full py-2 px-4 rounded-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+                    disabled={isLoading || loadingCursoId !== null || isComprado}
+                    className={`w-full py-2 px-4 rounded-sm text-sm font-semibold text-white transition duration-150 flex items-center justify-center gap-2 shadow-sm ${
+                      isComprado
+                        ? 'bg-emerald-600 cursor-default'
+                        : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
                   >
                     {isLoading ? (
                       <>
@@ -215,6 +240,8 @@ export function CursosPage() {
                         </svg>
                         <span>Conectando...</span>
                       </>
+                    ) : isComprado ? (
+                      'YA COMPRADO'
                     ) : (
                       'QUIERO ESTE CURSO'
                     )}

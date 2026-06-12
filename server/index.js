@@ -26,6 +26,7 @@ const usuarioSchema = new mongoose.Schema(
     username: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
     rol: { type: String, enum: ['ADMIN', 'CONSULTA'], required: true },
+    cursos: { type: [String], default: [] },
   },
   { versionKey: false },
 )
@@ -123,7 +124,8 @@ app.post('/pago/preferencia', async (req, res) => {
         success: successUrl,
         failure: failureUrl,
         pending: pendingUrl,
-      }
+      },
+      external_reference: id
     }
 
     if (successUrl.startsWith('https')) {
@@ -139,6 +141,30 @@ app.post('/pago/preferencia', async (req, res) => {
 })
 
 // ─── Rutas protegidas ───────────────────────────────────────────────────────────
+
+app.get('/mis-cursos', verificarToken, async (req, res) => {
+  const username = req.usuario.username
+  const usuario = await Usuario.findOne({ username })
+  if (!usuario) {
+    res.status(404).json({ error: 'Usuario no encontrado' })
+    return
+  }
+  res.json(usuario.cursos || [])
+})
+
+app.post('/mis-cursos', verificarToken, async (req, res) => {
+  const { cursoId } = req.body
+  if (!cursoId) {
+    res.status(400).json({ error: 'Falta cursoId' })
+    return
+  }
+  const username = req.usuario.username
+  await Usuario.findOneAndUpdate(
+    { username },
+    { $addToSet: { cursos: cursoId } }
+  )
+  res.json({ message: 'Curso registrado exitosamente' })
+})
 
 app.use('/participantes', verificarToken)
 
