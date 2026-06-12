@@ -14,7 +14,7 @@ services:
     environment:
       PORT: ${PORT:-3000}
       MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017/registro-evento}
-      JWT_SECRET: ${JWT_SECRET:-jwt_secreto_tp7_desarrollo}
+      JWT_SECRET: ${JWT_SECRET:-jwt_secreto_tp9_desarrollo}
     ports:
       - "${API_PORT:-3000}:3000"
     depends_on:
