@@ -126,7 +126,7 @@ app.post('/pago/preferencia', async (req, res) => {
       }
     }
 
-    if (successUrl.startsWith('https') || successUrl.includes('localhost')) {
+    if (successUrl.startsWith('https')) {
       body.auto_return = 'approved'
     }
 

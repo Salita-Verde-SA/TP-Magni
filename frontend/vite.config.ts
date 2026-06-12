@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     allowedHosts: true,
     proxy: {
-      '/pago': 'http://localhost:3000',
+      '/pago/preferencia': 'http://localhost:3000',
       '/login': 'http://localhost:3000',
       '/participantes': 'http://localhost:3000'
     }
